@@ -1,0 +1,30 @@
+# Asset Universe Configuration
+
+timing_agent:
+  ticker: "SPY"
+  description: "S&P 500 ETF - Highly liquid"
+
+portfolio_agent:
+  tickers:
+    - "SPY"   # S&P 500 (Equities)
+    - "QQQ"   # Nasdaq 100 (Tech)
+    - "GLD"   # Gold (Commodities)
+    - "TLT"   # 20+ Year Treasury (Bonds)
+
+benchmark:
+  ticker: "SPY"
+
+# Data Parameters
+data_source: "yfinance"
+frequency: "1d"               # Daily data
+start_date: "2000-01-01"
+end_date: "2024-12-31"
+
+# Data Quality
+min_trading_days: 252         # Minimum days for valid data
+handle_missing: "forward_fill"
+max_fill_limit: 5             # Max consecutive days to forward fill
+
+# Corporate Actions
+adjust_splits: true
+adjust_dividends: true

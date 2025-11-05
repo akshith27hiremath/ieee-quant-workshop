@@ -1,0 +1,35 @@
+# Walk-Forward Cross-Validation Configuration
+
+method: "walk_forward"        # or "simple_split"
+
+# Simple Split Parameters (fallback)
+simple_split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+# Walk-Forward Parameters
+walk_forward:
+  # Training window: 3 years of data
+  train_window_days: 1095
+
+  # Validation window: 6 months
+  val_window_days: 180
+
+  # Step size: retrain every 3 months
+  step_days: 90
+
+  # Purging: remove N days after training set to prevent label leakage
+  purge_days: 5
+
+  # Embargo: remove N days before validation set
+  embargo_days: 5
+
+# Test Set (Hold-out)
+test_set:
+  start_date: "2019-01-01"
+  end_date: "2024-12-31"
+  description: "Unseen data for final evaluation"
+
+# Reproducibility
+random_seed: 42

@@ -1,0 +1,26 @@
+# Trading Environment Parameters
+
+# Transaction Costs
+transaction_costs:
+  commission_bps: 10          # 10 basis points (0.1%)
+  slippage_bps: 5             # 5 basis points (0.05%)
+
+# Portfolio Parameters
+initial_cash: 100000          # $100,000 starting capital
+allow_shorting: true
+max_leverage: 1.0             # 1x leverage (no margin)
+
+# Reward Engineering
+reward_type: "sharpe"         # Options: "pnl", "sharpe", "sortino", "drawdown_aware"
+risk_free_rate: 0.02          # 2% annual
+lookback_window: 252          # Days for Sharpe calculation
+
+# Episode Parameters
+max_steps: null               # null = full dataset length
+done_on_drawdown: false
+max_drawdown_threshold: 0.5   # Stop episode at 50% drawdown (if enabled)
+
+# Rebalancing (PortfolioAgent)
+rebalancing:
+  no_trade_band: 0.005        # 0.5% - no rebalance if weight change < threshold
+  turnover_penalty: 0.0001    # Penalty coefficient for high turnover

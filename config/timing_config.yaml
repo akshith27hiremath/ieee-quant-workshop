@@ -1,0 +1,145 @@
+# TimingAgent Configuration (Phase 2)
+# Single-asset discrete-action trading agent using DQN
+
+# Environment Configuration
+environment:
+  # Initial capital
+  initial_cash: 100000
+
+  # Transaction costs
+  transaction_costs:
+    commission_bps: 10  # 10 basis points (0.1%)
+    slippage_bps: 5     # 5 basis points (0.05%)
+
+  # Reward function
+  # Options: 'pnl', 'sharpe', 'sortino', 'drawdown_aware'
+  reward_type: 'sharpe'  # Start with risk-adjusted rewards
+  risk_free_rate: 0.02   # 2% annual risk-free rate
+  drawdown_penalty: 10.0 # Coefficient for drawdown-aware rewards
+
+  # Episode termination
+  max_steps: null        # null = run full dataset
+  done_on_drawdown: false
+  max_drawdown_threshold: 0.5  # 50% max drawdown
+
+# DQN Agent Configuration
+agent:
+  # Algorithm
+  algorithm: "DQN"
+
+  # Policy network architecture
+  policy: "MlpPolicy"
+  policy_kwargs:
+    net_arch: [128, 128]  # Two hidden layers with 128 neurons each
+    activation_fn: "relu"
+
+  # Learning hyperparameters
+  learning_rate: 0.0001  # Conservative learning rate for stability
+  buffer_size: 50000     # Experience replay buffer size
+  learning_starts: 1000  # Steps before learning starts
+  batch_size: 32         # Mini-batch size for training
+  tau: 0.005            # Soft update coefficient for target network
+  gamma: 0.99           # Discount factor
+  train_freq: 4         # Update network every N steps
+  gradient_steps: 1     # Number of gradient steps per update
+
+  # Exploration
+  exploration_fraction: 0.3    # Fraction of training for exploration
+  exploration_initial_eps: 1.0 # Initial epsilon (100% random actions)
+  exploration_final_eps: 0.05  # Final epsilon (5% random actions)
+
+  # Target network
+  target_update_interval: 1000  # Update target network every N steps
+
+  # Advanced features
+  optimize_memory_usage: false
+  tensorboard_log: "./logs/timing_agent"
+
+# Training Configuration
+training:
+  # Total training timesteps
+  total_timesteps: 100000  # Start conservative, increase if needed
+
+  # Evaluation during training
+  eval_freq: 5000         # Evaluate every N steps
+  n_eval_episodes: 5      # Number of episodes for evaluation
+  eval_deterministic: true # Use deterministic policy for eval
+
+  # Model saving
+  save_freq: 10000        # Save model every N steps
+  save_path: "./models/timing_agent"
+  best_model_save_path: "./models/timing_agent/best"
+
+  # Early stopping
+  early_stopping:
+    enabled: true
+    patience: 5           # Stop if no improvement after N evaluations
+    min_delta: 0.01       # Minimum improvement threshold
+
+  # Reproducibility
+  seed: 42
+
+# Data Configuration
+data:
+  # Asset to trade
+  ticker: "SPY"  # Single liquid asset
+
+  # Date ranges (will be overridden by cv_config splits)
+  train_start: "2000-01-01"
+  train_end: "2018-12-31"
+  val_start: "2019-01-01"
+  val_end: "2020-12-31"
+
+  # Features to use (subset of engineered features)
+  features:
+    # Returns
+    - "return_1d"
+    - "return_5d"
+    - "return_10d"
+
+    # Momentum
+    - "rsi"
+    - "rsi_norm"
+    - "macd"
+    - "macd_signal"
+    - "macd_diff"
+
+    # Trend
+    - "sma_50"
+    - "sma_200"
+    - "sma_crossover"
+    - "ema_12"
+    - "ema_26"
+
+    # Volatility
+    - "bb_high"
+    - "bb_low"
+    - "bb_width"
+    - "bb_percent"
+    - "atr"
+    - "atr_pct"
+
+    # Volume
+    - "volume_ratio"
+    - "obv"
+
+# Experiment Tracking
+experiment:
+  name: "timing_agent_v1"
+  description: "DQN agent for SPY timing with Sharpe reward"
+  tags:
+    - "DQN"
+    - "timing"
+    - "single-asset"
+    - "phase2"
+
+# Hyperparameter Search (optional - for future)
+hyperparameter_search:
+  enabled: false
+  method: "grid"  # or "random", "bayesian"
+  n_trials: 10
+  parameters:
+    learning_rate: [0.0001, 0.0005, 0.001]
+    gamma: [0.95, 0.99, 0.995]
+    buffer_size: [10000, 50000, 100000]
+    reward_type: ['pnl', 'sharpe', 'sortino']

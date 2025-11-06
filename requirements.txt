@@ -23,6 +23,7 @@ exchange-calendars>=4.2.0
 # Configuration & Logging
 pyyaml>=6.0
 python-dotenv>=1.0.0
+tensorboard>=2.14.0
 
 # Development & Testing
 pytest>=7.4.0

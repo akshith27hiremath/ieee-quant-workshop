@@ -72,12 +72,16 @@ def compare_strategies(dqn_result, data):
     # Buy and Hold
     print("  [1/2] Buy & Hold...")
     bh = BuyAndHold(initial_cash=100000)
-    bh_result = bh.run(data)
+    bh_metrics = bh.run(data)
+    # Add portfolio history to result - use matching index
+    bh_result = {**bh_metrics, 'portfolio_history': pd.Series(bh.portfolio_history, index=data.index[:len(bh.portfolio_history)])}
 
     # SMA Crossover
     print("  [2/2] SMA Crossover...")
     sma = SMAcrossover(initial_cash=100000, fast_window=50, slow_window=200)
-    sma_result = sma.run(data)
+    sma_metrics = sma.run(data)
+    # Add portfolio history to result - use matching index
+    sma_result = {**sma_metrics, 'portfolio_history': pd.Series(sma.portfolio_history, index=data.index[:len(sma.portfolio_history)])}
 
     # Create comparison dataframe
     comparison = pd.DataFrame({
@@ -300,10 +304,31 @@ def print_evaluation_summary(comparison_df):
 if __name__ == "__main__":
     # Test standalone
     print("Loading model...")
-    model = DQN.load('demo_models/dqn_agent/best_model.zip')
+    model_path = Path('demo_models/dqn_agent/best_model.zip')
+
+    if not model_path.exists():
+        # Try without .zip extension (stable-baselines3 adds it automatically)
+        model_path = Path('demo_models/dqn_agent/best_model')
+
+        if not model_path.exists():
+            print(f"ERROR: Model not found!")
+            print(f"Tried: demo_models/dqn_agent/best_model.zip")
+            print(f"Tried: demo_models/dqn_agent/best_model")
+            print("\nAvailable files in demo_models/dqn_agent/:")
+            model_dir = Path('demo_models/dqn_agent/')
+            if model_dir.exists():
+                for f in model_dir.iterdir():
+                    print(f"  - {f.name}")
+            else:
+                print(f"  Directory {model_dir} does not exist!")
+            sys.exit(1)
+
+    print(f"Loading model from: {model_path}")
+    # Load without .zip extension, let stable-baselines3 handle it
+    model = DQN.load(str(model_path).replace('.zip', ''))
 
     print("Loading data...")
-    data = pd.read_parquet('../data/features/featured_data.parquet')
+    data = pd.read_parquet('demo_data/featured_data.parquet')
     data = data[data['ticker'] == 'SPY'].copy()
 
     test_start = pd.Timestamp('2021-01-01')

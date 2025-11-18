@@ -230,10 +230,31 @@ def print_strategy_summary(analysis_results):
 if __name__ == "__main__":
     # Test standalone
     print("Loading model...")
-    model = DQN.load('demo_models/dqn_agent/best_model.zip')
+    model_path = Path('demo_models/dqn_agent/best_model.zip')
+
+    if not model_path.exists():
+        # Try without .zip extension (stable-baselines3 adds it automatically)
+        model_path = Path('demo_models/dqn_agent/best_model')
+
+        if not model_path.exists():
+            print(f"ERROR: Model not found!")
+            print(f"Tried: demo_models/dqn_agent/best_model.zip")
+            print(f"Tried: demo_models/dqn_agent/best_model")
+            print("\nAvailable files in demo_models/dqn_agent/:")
+            model_dir = Path('demo_models/dqn_agent/')
+            if model_dir.exists():
+                for f in model_dir.iterdir():
+                    print(f"  - {f.name}")
+            else:
+                print(f"  Directory {model_dir} does not exist!")
+            sys.exit(1)
+
+    print(f"Loading model from: {model_path}")
+    # Load without .zip extension, let stable-baselines3 handle it
+    model = DQN.load(str(model_path).replace('.zip', ''))
 
     print("Loading data...")
-    data = pd.read_parquet('../data/features/featured_data.parquet')
+    data = pd.read_parquet('demo_data/featured_data.parquet')
     data = data[data['ticker'] == 'SPY'].copy()
 
     test_start = pd.Timestamp('2021-01-01')
